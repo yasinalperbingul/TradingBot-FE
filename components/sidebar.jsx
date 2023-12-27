@@ -1,7 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { RxSketchLogo, RxDashboard, RxPerson } from 'react-icons/rx';
+import { RxSketchLogo, RxDashboard, RxPerson} from 'react-icons/rx';
+import { LuNewspaper} from 'react-icons/lu';
 import { HiOutlineShoppingBag } from 'react-icons/hi';
 import { FiSettings } from 'react-icons/fi';
 
@@ -16,14 +17,14 @@ const Sidebar = ({ children }) => {
             </div>
           </Link>
           <span className='border-b-[1px] border-gray-200 w-full p-2'></span>
-          <Link href='/'>
+          <Link href='/dashboard'>
             <div className='bg-gray-100 hover:bg-gray-200 cursor-pointer my-4 p-3 rounded-lg inline-block'>
               <RxDashboard size={20} />
             </div>
           </Link>
-          <Link href='/customers'>
+          <Link href='/news'>
             <div className='bg-gray-100 hover:bg-gray-200 cursor-pointer my-4 p-3 rounded-lg inline-block'>
-              <RxPerson size={20} />
+              <LuNewspaper size={20} />
             </div>
           </Link>
           <Link href='/orders'>
