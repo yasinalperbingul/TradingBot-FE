@@ -64,33 +64,43 @@ const AllCoins = () => {
         fetchData();
     }, []);
 
+
     return (
         <div className='my-8'>
-            <div className='grid gap-4 p-4'>
-                {/* Wallet Coin Information */}
-                <h1 className='text-xl hover:subpixel-antialiased font-bold'>Wallet</h1>
-                {responseData &&
-                    responseData.map((item, index) => (
-                        <div key={index} className="max-w-sm rounded overflow-hidden shadow-lg bg-white">
-                            <div className='p-4 grid md:grid-cols-6 grid-cols-1 gap-4'>
-                                <div>
-                                    {responseImages.coins.map((imageItem, imageIndex) => (
-                                        <div key={imageIndex}>
-                                            {imageItem.symbol === item.coin.toUpperCase() && (
-                                                <img className="w-12 h-auto" src={imageItem.iconUrl} alt={item.name} />
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="card-content">
-                                    <h2 className="font-bold text-xl mb-2">{item.coin}</h2>
-                                    <p>{item.free}</p>
+            <div className="grid grid-cols-3 gap-4">
+                {/* For Grid Operations: https://tailwindcss.com/docs/grid-column */}
+
+                <div className="p-4">
+                    {/* Wallet Coin Information */}
+                    <h1 className='text-xl hover:subpixel-antialiased font-bold mb-4'>Wallet</h1>
+                    {responseData &&
+                        responseData.map((item, index) => (
+                            <div key={index} className="max-w-sm rounded overflow-hidden shadow-lg bg-white">
+                                <div className='p-4 grid md:grid-cols-6 grid-cols-1 gap-4'>
+                                    <div>
+                                        {responseImages.coins.map((imageItem, imageIndex) => (
+                                            <div key={imageIndex}>
+                                                {imageItem.symbol === item.coin.toUpperCase() && (
+                                                    <img className="w-12 h-auto" src={imageItem.iconUrl} alt={item.name} />
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="card-content">
+                                        <h2 className="font-bold text-xl mb-2">{item.coin}</h2>
+                                        <p>{item.free}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                {/* Optional Form and Trade History */}
-                <TradingHistory responseData={responseData} />
+                        ))}
+                </div>
+                <div className='p-4'>
+                    <h1 className='text-xl hover:subpixel-antialiased font-bold'>Trading History</h1>
+                    <TradingHistory responseData={responseData} />
+                </div>
+                <div>
+                    3
+                </div>
             </div>
         </div>
     );

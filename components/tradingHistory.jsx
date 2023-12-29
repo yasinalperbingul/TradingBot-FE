@@ -5,7 +5,12 @@ import axios from 'axios';
 const TradingHistory = ({ responseData }) => {
     const [selectedCoin, setSelectedCoin] = useState('');
     const [tradeHistory, setTradeHistory] = useState(null);
-    
+    const [activeTab, setActiveTab] = useState(1);
+
+    const handleTabClick = (tabNumber) => {
+        setActiveTab(tabNumber);
+    };
+
 
     useEffect(() => {
         const fetchSelectedData = async () => {
@@ -33,7 +38,7 @@ const TradingHistory = ({ responseData }) => {
 
     return (
         <>
-            <div class="box-content h-128 w-64 p-4">
+            <div class="box-content p-4">
                 {/* Optional Form */}
                 <div className="inline-block relative w-64">
                     <select
@@ -60,7 +65,7 @@ const TradingHistory = ({ responseData }) => {
                     </div>
                 </div>
 
-                {/* Trade History */}
+
                 <ul className="bg-white shadow overflow-hidden sm:rounded-md max-w-5xl mx-auto mt-8">
                     {tradeHistory &&
                         tradeHistory.data.map((item, index) => (
@@ -70,16 +75,70 @@ const TradingHistory = ({ responseData }) => {
                                         <h3 className="text-xl leading-6 font-medium text-gray-900 mb-2">{`Trade ${index + 1}`}</h3>
                                         <p className="text-xs text-gray-500">{`Date: ${new Date(item.time).toLocaleString()}`}</p>
                                     </div>
-                                    <div className="mt-4 flex items-center justify-between">
-                                        <p className="text-sm font-medium text-gray-500">
+                                    <div className="mt-4">
+                                        {/* Status */}
+                                        <p className="text-sm font-medium text-gray-500 mb-4">
                                             Status: <span className={item.isBuyer ? 'text-green-600' : 'text-red-600'}>{item.isBuyer ? 'Bought' : 'Sold'}</span>
                                         </p>
-                                        <span className="text-sm font-medium text-gray-500">{`at Price: ${item.price}`}</span>
+                                        {/* Tabs */}
+                                        <div className="flex mb-4">
+                                            <button
+                                                className={`px-4 py-2 rounded-tl-md ${activeTab === 1 ? 'bg-gray-300' : 'bg-gray-100'
+                                                    } hover:bg-gray-200 focus:outline-none`}
+                                                onClick={() => handleTabClick(1)}
+                                            >
+                                                Amount
+                                            </button>
+                                            <button
+                                                className={`px-4 py-2 ${activeTab === 2 ? 'bg-gray-300' : 'bg-gray-100'} hover:bg-gray-200 focus:outline-none`}
+                                                onClick={() => handleTabClick(2)}
+                                            >
+                                                Total Value
+                                            </button>
+                                            <button
+                                                className={`px-4 py-2 ${activeTab === 3 ? 'bg-gray-300' : 'bg-gray-100'} hover:bg-gray-200 focus:outline-none`}
+                                                onClick={() => handleTabClick(3)}
+                                            >
+                                                At Price
+                                            </button>
+                                            <button
+                                                className={`px-4 py-2 rounded-tr-md ${activeTab === 4 ? 'bg-gray-300' : 'bg-gray-100'} hover:bg-gray-200 focus:outline-none`}
+                                                onClick={() => handleTabClick(4)}
+                                            >
+                                                Profit/Loss
+                                            </button>
+                                        </div>
+                                        {/* Tab Content */}
+                                        {activeTab === 1 && (
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-500">{`Amount: ${item.qty} ${item.symbol}`}</p>
+                                            </div>
+                                        )}
+                                        {activeTab === 2 && (
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-500">{`Total Value: ${parseFloat(item.qty) * parseFloat(item.price)} USDT`}</p>
+                                            </div>
+                                        )}
+                                        {activeTab === 3 && (
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-500">{`At Price: ${item.price}`}</p>
+                                            </div>
+                                        )}
+                                        {activeTab === 4 && (
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-500">
+                                                    Profit/Loss Ratio: {item.isBuyer ? 'No Profit or Loss' : (((parseFloat(item.price) - parseFloat(item.qty) * parseFloat(item.price)) / parseFloat(item.qty * parseFloat(item.price))) * 100).toFixed(2)} %
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </li>
                         ))}
                 </ul>
+
+
+
             </div>
         </>
     )
