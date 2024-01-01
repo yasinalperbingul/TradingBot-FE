@@ -137,8 +137,6 @@ const TradingHistory = ({ responseData }) => {
                         ))}
                 </ul>
 
-
-
             </div>
         </>
     )

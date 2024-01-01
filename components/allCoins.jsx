@@ -2,6 +2,7 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import axios from 'axios';
 import TradingHistory from './tradingHistory';
+import PieCharts from './pieCharts';
 
 const AllCoins = () => {
     // State to hold the fetched data
@@ -69,8 +70,13 @@ const AllCoins = () => {
         <div className='my-8'>
             <div className="grid grid-cols-3 gap-4">
                 {/* For Grid Operations: https://tailwindcss.com/docs/grid-column */}
+                <div class="col-span-2 ... p-4">
+                    <h1 className='text-xl hover:subpixel-antialiased font-bold mb-4'>PieChart</h1>
+                    <PieCharts responseData={responseData} />
+                </div>
+                <div class="... p-4">02</div>
 
-                <div className="p-4">
+                <div class="... p-4">
                     {/* Wallet Coin Information */}
                     <h1 className='text-xl hover:subpixel-antialiased font-bold mb-4'>Wallet</h1>
                     {responseData &&
@@ -94,12 +100,9 @@ const AllCoins = () => {
                             </div>
                         ))}
                 </div>
-                <div className='p-4'>
+                <div class="col-span-2 ... p-4">
                     <h1 className='text-xl hover:subpixel-antialiased font-bold'>Trading History</h1>
                     <TradingHistory responseData={responseData} />
-                </div>
-                <div>
-                    3
                 </div>
             </div>
         </div>
