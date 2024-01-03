@@ -1,20 +1,52 @@
-import { PieChart, Pie, Cell, Tooltip } from "recharts";
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 
-const PieCharts = ({ responseData }) => {
+const generateColor = (str, index) => {
+    const colorHash = (str) => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return hash;
+    };
+
+    const intToRGB = (i) => {
+        const c = (i & 0x00FFFFFF)
+            .toString(16)
+            .toUpperCase()
+            .padStart(6, '0');
+        return `#${c}`;
+    };
+
+    return intToRGB(colorHash(str + index));
+};
+
+const PieCharts = () => {
+    const [responseData, setResponseData] = useState(null);
     const [binanceData, setBinanceData] = useState([]);
     const [calculatedValues, setCalculatedValues] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
+            try {
+                const response = await axios.get('http://127.0.0.1:8000/livetrading/coin/20/');
+                setResponseData(response.data);
+                console.log("My coins info:", response);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        const fetchData = async () => {
             const binanceDataArray = [];
-            //console.log("pieCharts responseData:");
-            //console.log(responseData);
+
             for (const coinInfo of responseData) {
-                if (coinInfo.coin != "USDT") {
-                    //console.log("Entered pieCharts:");
-                    //console.log(coinInfo.coin + 'USDT');
+                if (coinInfo.coin !== "USDT") {
                     const options = {
                         method: 'GET',
                         url: 'https://binance43.p.rapidapi.com/ticker/24hr',
@@ -34,106 +66,58 @@ const PieCharts = ({ responseData }) => {
                 }
             }
 
-            console.log("BinanceDataArray:");
-            console.log(binanceDataArray)
-
-            // Set the binanceData array with the fetched data
             setBinanceData(binanceDataArray);
 
-
-            console.log("responseData in pieCaharts:");
-            console.log(responseData)
-            // Calculate values by multiplying free with lastPrice
             const calculatedValuesArray = responseData.map((coinInfo, index) => {
                 const binanceDataEntry = binanceDataArray[index];
                 if (binanceDataEntry) {
                     const calculatedAmount = parseFloat(coinInfo.free) * parseFloat(binanceDataEntry.lastPrice);
                     return {
                         coin: coinInfo.coin,
-                        calculatedAmount: calculatedAmount.toFixed(5), // Adjust precision as needed
+                        calculatedAmount: parseFloat(calculatedAmount.toFixed(5)),
                     };
                 } else {
                     return {
                         coin: coinInfo.coin,
-                        calculatedAmount: coinInfo.free, // or any other fallback value
+                        calculatedAmount: parseFloat(coinInfo.free),
                     };
                 }
             });
 
-            // Set the calculated values in state
             setCalculatedValues(calculatedValuesArray);
         };
 
         fetchData();
     }, [responseData]);
 
-    const data = [
-        {
-            name: "Twitter",
-            value: 200400,
-        },
-        {
-            name: "Facebook",
-            value: 205000,
-        },
-        {
-            name: "Instagram",
-            value: 23400,
-        },
-        {
-            name: "Snapchat",
-            value: 20000,
-        },
-        {
-            name: "LinkedIn",
-            value: 29078,
-        },
-        {
-            name: "YouTube",
-            value: 18900,
-        },
-    ];
-
-    const colors = [
-        "#8884d8",
-        "#FA8072",
-        "#AF69EE",
-        "#3DED97",
-        "#3AC7EB",
-        "#F9A603",
-    ];
     return (
-        <>
-            <div className="bg-white p-4 rounded-lg shadow-md">
-                <PieChart width={400} height={250}>
-                    <Pie
-                        data={data}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        fill="#8884d8"
-                        label
-                    >
-                        {data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={colors[index]} />
-                        ))}
-                    </Pie>
-                    <Tooltip />
-                </PieChart>
-
-                {/* Display the calculated values */}
-                <h2>Calculated Values</h2>
-                <ul>
-                    {calculatedValues.map((value) => (
-                        <li key={value.coin}>
-                            {value.coin} : {value.calculatedAmount} {value.coin}USDT
-                        </li>
-                    ))}
-                </ul>
-
+        <div className="flex">
+            <div className="bg-white p-4 rounded-lg">
+                <div className='grid grid-cols-3 gap-4'>
+                    <div className="col-span-2 p-4">
+                        <PieChart width={400} height={400}>
+                            <Pie data={calculatedValues} dataKey="calculatedAmount" nameKey="coin" cx="50%" cy="50%" outerRadius={160} fill="#8884d8">
+                                {calculatedValues.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={generateColor(entry.coin, index)} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                        </PieChart>
+                    </div>
+                    <div className="p-4">
+                        <div className="flex flex-col items-start ml-4">
+                            {calculatedValues.map((entry, index) => (
+                                <div key={`legend-${index}`} className="flex items-center mb-2">
+                                    <div className="w-6 h-6 mr-2" style={{ backgroundColor: generateColor(entry.coin, index) }}></div>
+                                    <span>{entry.coin}</span>
+                                    <span className="ml-2"> - {entry.calculatedAmount} USDT</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
-        </>
+        </div>
     );
 };
 

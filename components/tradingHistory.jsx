@@ -6,6 +6,19 @@ const TradingHistory = ({ responseData }) => {
     const [selectedCoin, setSelectedCoin] = useState('');
     const [tradeHistory, setTradeHistory] = useState(null);
     const [activeTab, setActiveTab] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 3;
+
+    // Assuming tradeHistory is an array of trade data
+    const totalItems = tradeHistory ? tradeHistory.data.length : 0;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const paginatedData = tradeHistory ? tradeHistory.data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) : [];
+
 
     const handleTabClick = (tabNumber) => {
         setActiveTab(tabNumber);
@@ -65,77 +78,95 @@ const TradingHistory = ({ responseData }) => {
                     </div>
                 </div>
 
-
+                {/* List */}
                 <ul className="bg-white shadow overflow-hidden sm:rounded-md max-w-5xl mx-auto mt-8">
-                    {tradeHistory &&
-                        tradeHistory.data.map((item, index) => (
-                            <li key={index} className={`border-t border-gray-200 ${index > 0 ? 'mt-8' : ''}`}>
-                                <div className="px-6 py-8 sm:px-8">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-xl leading-6 font-medium text-gray-900 mb-2">{`Trade ${index + 1}`}</h3>
-                                        <p className="text-xs text-gray-500">{`Date: ${new Date(item.time).toLocaleString()}`}</p>
-                                    </div>
-                                    <div className="mt-4">
-                                        {/* Status */}
-                                        <p className="text-sm font-medium text-gray-500 mb-4">
-                                            Status: <span className={item.isBuyer ? 'text-green-600' : 'text-red-600'}>{item.isBuyer ? 'Bought' : 'Sold'}</span>
-                                        </p>
-                                        {/* Tabs */}
-                                        <div className="flex mb-4">
-                                            <button
-                                                className={`px-4 py-2 rounded-tl-md ${activeTab === 1 ? 'bg-gray-300' : 'bg-gray-100'
-                                                    } hover:bg-gray-200 focus:outline-none`}
-                                                onClick={() => handleTabClick(1)}
-                                            >
-                                                Amount
-                                            </button>
-                                            <button
-                                                className={`px-4 py-2 ${activeTab === 2 ? 'bg-gray-300' : 'bg-gray-100'} hover:bg-gray-200 focus:outline-none`}
-                                                onClick={() => handleTabClick(2)}
-                                            >
-                                                Total Value
-                                            </button>
-                                            <button
-                                                className={`px-4 py-2 ${activeTab === 3 ? 'bg-gray-300' : 'bg-gray-100'} hover:bg-gray-200 focus:outline-none`}
-                                                onClick={() => handleTabClick(3)}
-                                            >
-                                                At Price
-                                            </button>
-                                            <button
-                                                className={`px-4 py-2 rounded-tr-md ${activeTab === 4 ? 'bg-gray-300' : 'bg-gray-100'} hover:bg-gray-200 focus:outline-none`}
-                                                onClick={() => handleTabClick(4)}
-                                            >
-                                                Profit/Loss
-                                            </button>
-                                        </div>
-                                        {/* Tab Content */}
-                                        {activeTab === 1 && (
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-500">{`Amount: ${item.qty} ${item.symbol}`}</p>
-                                            </div>
-                                        )}
-                                        {activeTab === 2 && (
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-500">{`Total Value: ${parseFloat(item.qty) * parseFloat(item.price)} USDT`}</p>
-                                            </div>
-                                        )}
-                                        {activeTab === 3 && (
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-500">{`At Price: ${item.price}`}</p>
-                                            </div>
-                                        )}
-                                        {activeTab === 4 && (
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-500">
-                                                    Profit/Loss Ratio: {item.isBuyer ? 'No Profit or Loss' : (((parseFloat(item.price) - parseFloat(item.qty) * parseFloat(item.price)) / parseFloat(item.qty * parseFloat(item.price))) * 100).toFixed(2)} %
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
+                    {paginatedData.map((item, index) => (
+                        <li key={index} className={`border-t border-gray-200 ${index > 0 ? 'mt-8' : ''}`}>
+                            <div className="px-6 py-8 sm:px-8">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xl leading-6 font-medium text-gray-900 mb-2">{`Trade ${index + 1}`}</h3>
+                                    <p className="text-xs text-gray-500">{`Date: ${new Date(item.time).toLocaleString()}`}</p>
                                 </div>
-                            </li>
-                        ))}
+                                <li key={index} className={`border-t border-gray-200 ${index > 0 ? 'mt-8' : ''}`}>
+                                    <div className="px-6 py-8 sm:px-8">
+                                        <div className="mt-4">
+                                            {/* Status */}
+                                            <p className="text-sm font-medium text-gray-500 mb-4">
+                                                Status: <span className={item.isBuyer ? 'text-green-600' : 'text-red-600'}>{item.isBuyer ? 'Bought' : 'Sold'}</span>
+                                            </p>
+                                            {/* Tabs */}
+                                            <div className="flex mb-4">
+                                                <button
+                                                    className={`px-4 py-2 rounded-tl-md ${activeTab === 1 ? 'bg-gray-300' : 'bg-gray-100'
+                                                        } hover:bg-gray-200 focus:outline-none`}
+                                                    onClick={() => handleTabClick(1)}
+                                                >
+                                                    Amount
+                                                </button>
+                                                <button
+                                                    className={`px-4 py-2 ${activeTab === 2 ? 'bg-gray-300' : 'bg-gray-100'} hover:bg-gray-200 focus:outline-none`}
+                                                    onClick={() => handleTabClick(2)}
+                                                >
+                                                    Total Value
+                                                </button>
+                                                <button
+                                                    className={`px-4 py-2 ${activeTab === 3 ? 'bg-gray-300' : 'bg-gray-100'} hover:bg-gray-200 focus:outline-none`}
+                                                    onClick={() => handleTabClick(3)}
+                                                >
+                                                    At Price
+                                                </button>
+                                                <button
+                                                    className={`px-4 py-2 rounded-tr-md ${activeTab === 4 ? 'bg-gray-300' : 'bg-gray-100'} hover:bg-gray-200 focus:outline-none`}
+                                                    onClick={() => handleTabClick(4)}
+                                                >
+                                                    Profit/Loss
+                                                </button>
+                                            </div>
+                                            {/* Tab Content */}
+                                            {activeTab === 1 && (
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-500">{`Amount: ${item.qty} ${item.symbol}`}</p>
+                                                </div>
+                                            )}
+                                            {activeTab === 2 && (
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-500">{`Total Value: ${parseFloat(item.qty) * parseFloat(item.price)} USDT`}</p>
+                                                </div>
+                                            )}
+                                            {activeTab === 3 && (
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-500">{`At Price: ${item.price}`}</p>
+                                                </div>
+                                            )}
+                                            {activeTab === 4 && (
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-500">
+                                                        Profit/Loss Ratio: {item.isBuyer ? 'No Profit or Loss' : (((parseFloat(item.price) - parseFloat(item.qty) * parseFloat(item.price)) / parseFloat(item.qty * parseFloat(item.price))) * 100).toFixed(2)} %
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </li>
+                            </div>
+                        </li>
+                    ))}
                 </ul>
+
+                {/* Pagination controls */}
+                {totalPages > 1 && (
+                    <div className="flex justify-center mt-4">
+                        {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                                key={i}
+                                className={`px-3 py-1 mx-1 rounded ${currentPage === i + 1 ? 'bg-gray-300' : 'bg-gray-100'} hover:bg-gray-200 focus:outline-none`}
+                                onClick={() => handlePageChange(i + 1)}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
             </div>
         </>
@@ -143,3 +174,5 @@ const TradingHistory = ({ responseData }) => {
 }
 
 export default TradingHistory
+
+
