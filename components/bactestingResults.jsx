@@ -4,6 +4,29 @@ import axios from 'axios';
 const BackTestingResults = () => {
     const [responseData, setResponseData] = useState(null);
     const [selectedSymbol, setSelectedSymbol] = useState('');
+    const [sortOrder, setSortOrder] = useState('asc');
+    const [sortOption, setSortOption] = useState('pnl');
+
+    const handleSortOptionChange = (option) => {
+        setSortOption(option);
+    };
+
+    const sortFunction = (a, b) => {
+        const aValue = sortOption === 'pnl' ? a.test_results.test_set_results[0].pnl : a.test_results.test_set_results[0].max_drawdown;
+        const bValue = sortOption === 'pnl' ? b.test_results.test_set_results[0].pnl : b.test_results.test_set_results[0].max_drawdown;
+        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+    };
+
+    const sortedResults = responseData
+        ? responseData
+            .filter(result => !selectedSymbol || result.symbol === selectedSymbol)
+            .sort(sortFunction)
+        : [];
+
+
+    const handleSortOrderChange = () => {
+        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    };
 
     const uniqueSymbols = responseData
         ? Array.from(new Set(responseData.map(result => result.symbol)))
@@ -34,17 +57,33 @@ const BackTestingResults = () => {
     return (
         <div>
             <div className="mb-4">
-                <label htmlFor="symbolFilter" className="mr-2">Select Coin:</label>
+                <strong htmlFor="symbolFilter" className="mr-2">Select Coin:</strong>
                 <select
                     id="symbolFilter"
                     onChange={handleSymbolChange}
                     value={selectedSymbol}
+                    className="mr-5"
                 >
                     <option value="">All Coins</option>
                     {uniqueSymbols.map(symbol => (
                         <option key={symbol} value={symbol}>{symbol}</option>
                     ))}
                 </select>
+
+                <strong htmlFor="sortOption" className="mr-2">Sort by:</strong>
+                <select
+                    id="sortOption"
+                    onChange={(e) => handleSortOptionChange(e.target.value)}
+                    value={sortOption}
+                    className="mr-5"
+                >
+                    <option value="pnl">PnL</option>
+                    <option value="max_drawdown">Max Drawdown</option>
+                </select>
+
+                <button onClick={handleSortOrderChange} className="inline-flex items-center">
+                    Sort by {sortOption === 'pnl' ? 'PnL' : 'Max Drawdown'} {sortOrder === 'asc' ? <span className="ml-1">&#9650;</span> : <span className="ml-1">&#9660;</span>}
+                </button>
             </div>
 
 
@@ -88,88 +127,85 @@ const BackTestingResults = () => {
                         </tr>
                     </thead>
                     <tbody className='text-center'>
-                        {responseData &&
-                            responseData
-                                .filter(result => !selectedSymbol || result.symbol === selectedSymbol)
-                                .map((result, index) => (
-                                    <tr
-                                        key={index}
-                                        className={`${index % 2 === 0 ? 'bg-white' : 'bg-white dark:bg-gray-800'
-                                            } border-b dark:border-gray-700`}
-                                    >
-                                        <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                            {result.symbol}
-                                        </td>
-                                        <td className="px-6 py-4">{result.time_interval}</td>
-                                        <td className="px-6 py-4">{result.population_size}</td>
-                                        <td className="px-6 py-4">{result.generation_size}</td>
-                                        <td>
-                                            {result.test_results.parameters.map((param, paramIndex) => (
-                                                <div key={paramIndex} className="p-10">
-                                                    <div className="px-6 py-4">{param.ma_type}</div>
-                                                </div>
-                                            ))}
-                                        </td>
-                                        <td>
-                                            {result.test_results.parameters.map((param, paramIndex) => (
-                                                <div key={paramIndex} className="p-10">
-                                                    <div className="px-6 py-4">{param.ma_length}</div>
-                                                </div>
-                                            ))}
-                                        </td>
-                                        <td>
-                                            {result.test_results.parameters.map((param, paramIndex) => (
-                                                <div key={paramIndex} className="p-10">
-                                                    <div className="px-6 py-4">{param.atr_length}</div>
-                                                </div>
-                                            ))}
-                                        </td>
-                                        <td>
-                                            {result.test_results.parameters.map((param, paramIndex) => (
-                                                <div key={paramIndex} className="p-10">
-                                                    <div className="px-6 py-4">{param.source_type}</div>
-                                                </div>
-                                            ))}
-                                        </td>
-                                        <td>
-                                            {result.test_results.parameters.map((param, paramIndex) => (
-                                                <div key={paramIndex} className="p-10">
-                                                    <div className="px-6 py-4">{param.atr_multiplier}</div>
-                                                </div>
-                                            ))}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {result.test_results.train_set_results.map((trainResult, trainIndex) => (
-                                                <div key={trainIndex} className='text-left'>
-                                                    <div className='p-4'>
-                                                        <strong>PnL</strong>
-                                                        <div>{`${(trainResult.pnl * 100).toFixed(2)}%`}</div>
-                                                        <br></br>
-                                                        <strong>Max Drawdown:</strong>
-                                                        <div>{`${(trainResult.max_drawdown).toFixed(2)}%`}</div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </td>
+                        {sortedResults.map((result, index) => (
+                            <tr
+                                key={index}
+                                className={`${index % 2 === 0 ? 'bg-white' : 'bg-white dark:bg-gray-800'
+                                    } border-b dark:border-gray-700`}
+                            >
+                                <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                    {result.symbol}
+                                </td>
+                                <td className="px-6 py-4">{result.time_interval}</td>
+                                <td className="px-6 py-4">{result.population_size}</td>
+                                <td className="px-6 py-4">{result.generation_size}</td>
+                                <td>
+                                    {result.test_results.parameters.map((param, paramIndex) => (
+                                        <div key={paramIndex} className="p-10">
+                                            <div className="px-6 py-4">{param.ma_type}</div>
+                                        </div>
+                                    ))}
+                                </td>
+                                <td>
+                                    {result.test_results.parameters.map((param, paramIndex) => (
+                                        <div key={paramIndex} className="p-10">
+                                            <div className="px-6 py-4">{param.ma_length}</div>
+                                        </div>
+                                    ))}
+                                </td>
+                                <td>
+                                    {result.test_results.parameters.map((param, paramIndex) => (
+                                        <div key={paramIndex} className="p-10">
+                                            <div className="px-6 py-4">{param.atr_length}</div>
+                                        </div>
+                                    ))}
+                                </td>
+                                <td>
+                                    {result.test_results.parameters.map((param, paramIndex) => (
+                                        <div key={paramIndex} className="p-10">
+                                            <div className="px-6 py-4">{param.source_type}</div>
+                                        </div>
+                                    ))}
+                                </td>
+                                <td>
+                                    {result.test_results.parameters.map((param, paramIndex) => (
+                                        <div key={paramIndex} className="p-10">
+                                            <div className="px-6 py-4">{param.atr_multiplier}</div>
+                                        </div>
+                                    ))}
+                                </td>
+                                <td className="px-6 py-4">
+                                    {result.test_results.train_set_results.map((trainResult, trainIndex) => (
+                                        <div key={trainIndex} className='text-left'>
+                                            <div className='p-4'>
+                                                <strong>PnL</strong>
+                                                <div>{`${(trainResult.pnl * 100).toFixed(2)}%`}</div>
+                                                <br></br>
+                                                <strong>Max Drawdown:</strong>
+                                                <div>{`${(trainResult.max_drawdown).toFixed(2)}%`}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </td>
 
-                                        <td className="px-6 py-4">
-                                            {result.test_results.test_set_results.map((testResult, testIndex) => (
-                                                <div key={testIndex} className='text-left'>
-                                                    <div
-                                                        key={testIndex}
-                                                        className={`p-4 ${testResult.pnl >= 0 ? 'bg-green-200' : 'bg-red-200'}`}
-                                                    >
-                                                        <strong>PnL</strong>
-                                                        <div>{`${(testResult.pnl * 100).toFixed(2)}%`}</div>
-                                                        <br></br>
-                                                        <strong>Max Drawdown:</strong>
-                                                        <div>{`${(testResult.max_drawdown).toFixed(2)}%`}</div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </td>
-                                    </tr>
-                                ))}
+                                <td className="px-6 py-4">
+                                    {result.test_results.test_set_results.map((testResult, testIndex) => (
+                                        <div key={testIndex} className='text-left'>
+                                            <div
+                                                key={testIndex}
+                                                className={`p-4 ${testResult.pnl >= 0 ? 'bg-green-200' : 'bg-red-200'}`}
+                                            >
+                                                <strong>PnL</strong>
+                                                <div>{`${(testResult.pnl * 100).toFixed(2)}%`}</div>
+                                                <br></br>
+                                                <strong>Max Drawdown:</strong>
+                                                <div>{`${(testResult.max_drawdown).toFixed(2)}%`}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
