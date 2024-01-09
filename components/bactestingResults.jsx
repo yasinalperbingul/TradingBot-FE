@@ -3,6 +3,16 @@ import axios from 'axios';
 
 const BackTestingResults = () => {
     const [responseData, setResponseData] = useState(null);
+    const [selectedSymbol, setSelectedSymbol] = useState('');
+
+    const uniqueSymbols = responseData
+        ? Array.from(new Set(responseData.map(result => result.symbol)))
+        : [];
+
+    const handleSymbolChange = (event) => {
+        setSelectedSymbol(event.target.value);
+    };
+
 
     useEffect(() => {
         // Function to fetch data
@@ -22,76 +32,147 @@ const BackTestingResults = () => {
     }, []); // Empty dependency array to run the effect only once when the component mounts
 
     return (
-        <div className="relative overflow-x-auto">
-            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                        <th scope="col" className="px-6 py-3">
-                            Symbol
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Time Interval
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Population Size
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Generation Size
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Parameters
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Test Set Results
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Train Set Results
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {responseData &&
-                        responseData.map((result, index) => (
-                            <tr
-                                key={index}
-                                className={`${index % 2 === 0 ? 'bg-white' : 'bg-white dark:bg-gray-800'
-                                    } border-b dark:border-gray-700`}
-                            >
-                                <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    {result.symbol}
-                                </td>
-                                <td className="px-6 py-4">{result.time_interval}</td>
-                                <td className="px-6 py-4">{result.population_size}</td>
-                                <td className="px-6 py-4">{result.generation_size}</td>
-                                <td className="px-6 py-4">
-                                    {result.test_results.parameters.map((param, paramIndex) => (
-                                        <div key={paramIndex}>
-                                            {`ma_type: ${param.ma_type}, ma_length: ${param.ma_length}, atr_length: ${param.atr_length}, source_type: ${param.source_type}, atr_multiplier: ${param.atr_multiplier}`}
-                                        </div>
-                                    ))}
-                                </td>
-                                <td className="px-6 py-4">
-                                    {result.test_results.test_set_results.map((testResult, testIndex) => (
-                                        <div key={testIndex}>
-                                            {`pnl: ${(testResult.pnl * 100).toFixed(2)}%, max_drawdown: ${(testResult.max_drawdown * 100).toFixed(
-                                                2
-                                            )}%`}
-                                        </div>
-                                    ))}
-                                </td>
-                                <td className="px-6 py-4">
-                                    {result.test_results.train_set_results.map((trainResult, trainIndex) => (
-                                        <div key={trainIndex}>
-                                            {`pnl: ${(trainResult.pnl * 100).toFixed(2)}%, max_drawdown: ${(trainResult.max_drawdown * 100).toFixed(
-                                                2
-                                            )}%`}
-                                        </div>
-                                    ))}
-                                </td>
-                            </tr>
-                        ))}
-                </tbody>
-            </table>
+        <div>
+            <div className="mb-4">
+                <label htmlFor="symbolFilter" className="mr-2">Select Coin:</label>
+                <select
+                    id="symbolFilter"
+                    onChange={handleSymbolChange}
+                    value={selectedSymbol}
+                >
+                    <option value="">All Coins</option>
+                    {uniqueSymbols.map(symbol => (
+                        <option key={symbol} value={symbol}>{symbol}</option>
+                    ))}
+                </select>
+            </div>
+
+
+            <div className="relative overflow-x-auto">
+                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" className="px-6 py-3">
+                                Symbol
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                Time Interval
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                Population Size
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                Generation Size
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                ma_type
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                ma_length
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                atr_length
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                source_type
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                atr_multiplier
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                Train Set Results
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                Test Set Results
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className='text-center'>
+                        {responseData &&
+                            responseData
+                                .filter(result => !selectedSymbol || result.symbol === selectedSymbol)
+                                .map((result, index) => (
+                                    <tr
+                                        key={index}
+                                        className={`${index % 2 === 0 ? 'bg-white' : 'bg-white dark:bg-gray-800'
+                                            } border-b dark:border-gray-700`}
+                                    >
+                                        <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            {result.symbol}
+                                        </td>
+                                        <td className="px-6 py-4">{result.time_interval}</td>
+                                        <td className="px-6 py-4">{result.population_size}</td>
+                                        <td className="px-6 py-4">{result.generation_size}</td>
+                                        <td>
+                                            {result.test_results.parameters.map((param, paramIndex) => (
+                                                <div key={paramIndex} className="p-10">
+                                                    <div className="px-6 py-4">{param.ma_type}</div>
+                                                </div>
+                                            ))}
+                                        </td>
+                                        <td>
+                                            {result.test_results.parameters.map((param, paramIndex) => (
+                                                <div key={paramIndex} className="p-10">
+                                                    <div className="px-6 py-4">{param.ma_length}</div>
+                                                </div>
+                                            ))}
+                                        </td>
+                                        <td>
+                                            {result.test_results.parameters.map((param, paramIndex) => (
+                                                <div key={paramIndex} className="p-10">
+                                                    <div className="px-6 py-4">{param.atr_length}</div>
+                                                </div>
+                                            ))}
+                                        </td>
+                                        <td>
+                                            {result.test_results.parameters.map((param, paramIndex) => (
+                                                <div key={paramIndex} className="p-10">
+                                                    <div className="px-6 py-4">{param.source_type}</div>
+                                                </div>
+                                            ))}
+                                        </td>
+                                        <td>
+                                            {result.test_results.parameters.map((param, paramIndex) => (
+                                                <div key={paramIndex} className="p-10">
+                                                    <div className="px-6 py-4">{param.atr_multiplier}</div>
+                                                </div>
+                                            ))}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {result.test_results.train_set_results.map((trainResult, trainIndex) => (
+                                                <div key={trainIndex} className='text-left'>
+                                                    <div className='p-4'>
+                                                        <strong>PnL</strong>
+                                                        <div>{`${(trainResult.pnl * 100).toFixed(2)}%`}</div>
+                                                        <br></br>
+                                                        <strong>Max Drawdown:</strong>
+                                                        <div>{`${(trainResult.max_drawdown).toFixed(2)}%`}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </td>
+
+                                        <td className="px-6 py-4">
+                                            {result.test_results.test_set_results.map((testResult, testIndex) => (
+                                                <div key={testIndex} className='text-left'>
+                                                    <div
+                                                        key={testIndex}
+                                                        className={`p-4 ${testResult.pnl >= 0 ? 'bg-green-200' : 'bg-red-200'}`}
+                                                    >
+                                                        <strong>PnL</strong>
+                                                        <div>{`${(testResult.pnl * 100).toFixed(2)}%`}</div>
+                                                        <br></br>
+                                                        <strong>Max Drawdown:</strong>
+                                                        <div>{`${(testResult.max_drawdown).toFixed(2)}%`}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </td>
+                                    </tr>
+                                ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };
