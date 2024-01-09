@@ -12,8 +12,27 @@ const BackTestingResults = () => {
     };
 
     const sortFunction = (a, b) => {
-        const aValue = sortOption === 'pnl' ? a.test_results.test_set_results[0].pnl : a.test_results.test_set_results[0].max_drawdown;
-        const bValue = sortOption === 'pnl' ? b.test_results.test_set_results[0].pnl : b.test_results.test_set_results[0].max_drawdown;
+        let aValue, bValue;
+
+        switch (sortOption) {
+            case 'pnl':
+                aValue = a.test_results.test_set_results[0].pnl;
+                bValue = b.test_results.test_set_results[0].pnl;
+                break;
+            case 'max_drawdown':
+                aValue = a.test_results.test_set_results[0].max_drawdown;
+                bValue = b.test_results.test_set_results[0].max_drawdown;
+                break;
+            case 'generation_size':
+                aValue = a.generation_size;
+                bValue = b.generation_size;
+                break;
+            default:
+                // Default to sorting by 'generation_size' if the option is not recognized
+                aValue = a.generation_size;
+                bValue = b.generation_size;
+        }
+
         return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
     };
 
@@ -70,7 +89,9 @@ const BackTestingResults = () => {
                     ))}
                 </select>
 
-                <strong htmlFor="sortOption" className="mr-2">Sort by:</strong>
+                <strong htmlFor="sortOption" className="mr-2">
+                    Sort by:
+                </strong>
                 <select
                     id="sortOption"
                     onChange={(e) => handleSortOptionChange(e.target.value)}
@@ -79,10 +100,11 @@ const BackTestingResults = () => {
                 >
                     <option value="pnl">PnL</option>
                     <option value="max_drawdown">Max Drawdown</option>
+                    <option value="generation_size">Generation Size</option> {/* Added option for generation_size */}
                 </select>
 
                 <button onClick={handleSortOrderChange} className="inline-flex items-center">
-                    Sort by {sortOption === 'pnl' ? 'PnL' : 'Max Drawdown'} {sortOrder === 'asc' ? <span className="ml-1">&#9650;</span> : <span className="ml-1">&#9660;</span>}
+                    Sort by {sortOption === 'pnl' ? 'PnL' : sortOption === 'max_drawdown' ? 'Max Drawdown' : 'Generation Size'} {sortOrder === 'asc' ? <span className="ml-1">&#9650;</span> : <span className="ml-1">&#9660;</span>}
                 </button>
             </div>
 
