@@ -146,6 +146,12 @@ const BackTestingResults = () => {
                             <th scope="col" className="px-6 py-3">
                                 Test Set Results
                             </th>
+                            <th scope="col" className="px-6 py-3">
+                                Max Draw. Error Rate
+                            </th>
+                            <th scope="col" className="px-6 py-3">
+                                PnL Error Rate
+                            </th>
                         </tr>
                     </thead>
                     <tbody className='text-center'>
@@ -222,6 +228,32 @@ const BackTestingResults = () => {
                                                 <br></br>
                                                 <strong>Max Drawdown:</strong>
                                                 <div>{`${(testResult.max_drawdown).toFixed(2)}%`}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </td>
+
+                                <td className="px-6 py-4">
+                                    {result.test_results.max_dd_error_rates.map((testResult, testIndex) => (
+                                        <div key={testIndex} className='text-left'>
+                                            <div>
+
+                                                <div>{`${(testResult).toFixed(2)}%`}</div>
+                                                <br></br>
+
+                                            </div>
+                                        </div>
+                                    ))}
+                                </td>
+
+                                <td className="px-6 py-4">
+                                    {result.test_results.pnl_error_rates.map((testResult, testIndex) => (
+                                        <div key={testIndex} className='text-left'>
+                                            <div>
+
+                                                <div>{`${(testResult).toFixed(2)}%`}</div>
+                                                <br></br>
+
                                             </div>
                                         </div>
                                     ))}

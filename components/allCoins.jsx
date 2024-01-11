@@ -74,8 +74,6 @@ const AllCoins = () => {
                     <h1 className='text-xl hover:subpixel-antialiased font-bold mb-4'>PieChart</h1>
                     <PieCharts responseData={responseData} />
                 </div>
-                <div class="... p-4">02</div>
-
                 <div class="... p-4">
                     {/* Wallet Coin Information */}
                     <h1 className='text-xl hover:subpixel-antialiased font-bold mb-4'>Wallet</h1>
@@ -100,9 +98,13 @@ const AllCoins = () => {
                             </div>
                         ))}
                 </div>
+
                 <div class="col-span-2 ... p-4">
                     <h1 className='text-xl hover:subpixel-antialiased font-bold'>Trading History</h1>
                     <TradingHistory responseData={responseData} />
+                </div>
+                <div class="... p-4">
+
                 </div>
             </div>
         </div>
